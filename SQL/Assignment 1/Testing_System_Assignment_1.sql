@@ -86,7 +86,7 @@ CREATE TABLE Answer(
 	AnswerID		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	Content			TEXT,
     QuestionID		INT UNSIGNED,
-	isCorrect		BOOLEAN,
+	isCorrect		BIT,
     FOREIGN KEY (QuestionID) REFERENCES Question (QuestionID)
 );
 

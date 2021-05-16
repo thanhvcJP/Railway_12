@@ -1,33 +1,33 @@
--- CREATE DATABASE Testing_System_Assignment_1
-DROP DATABASE IF EXISTS Testing_System_Assignment_1;
-CREATE DATABASE Testing_System_Assignment_1;
+-- CREATE DATABASE Testing_System_Assignment_2
+DROP DATABASE IF EXISTS Testing_System_Assignment_2;
+CREATE DATABASE Testing_System_Assignment_2;
 
-USE Testing_System_Assignment_1;
+USE Testing_System_Assignment_2;
 
 -- CREATE TABLE Department
 DROP TABLE IF EXISTS Department;
 CREATE TABLE Department (
-	DepartmentID 	INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    DepartmentName	VARCHAR (50)
+	DepartmentID 	SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    DepartmentName	NVARCHAR (50) UNIQUE NOT NULL
 );
 
 -- CREATE TABLE Position
 DROP TABLE IF EXISTS `Position`;
 CREATE TABLE `Position`(
-	PositionID 		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    PositionName 	VARCHAR (50)
+	PositionID 		MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    PositionName 	ENUM ('Dev', 'Test', 'Scrum Master', 'PM', 'Sale', 'MKT', 'BV', 'Warehouse') UNIQUE NOT NULL
 );
 
 -- CREATE TABLE Account
 DROP TABLE IF EXISTS `Account`;
 CREATE TABLE `Account` (
 	AccountID		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Email 			VARCHAR(100) UNIQUE,
-    Username		VARCHAR(50) UNIQUE,
-    FullName		VARCHAR(50),
-	DepartmentID	INT UNSIGNED,
-	PositionID		INT UNSIGNED,
-	CreateDate		DATE,
+    Email 			NVARCHAR(100) UNIQUE NOT NULL,
+    Username		NVARCHAR(50) UNIQUE NOT NULL,
+    FullName		NVARCHAR(50) NOT NULL,
+	DepartmentID	SMALLINT UNSIGNED NOT NULL,
+	PositionID		MEDIUMINT UNSIGNED NOT NULL,
+	CreateDate		DATETIME DEFAULT Now(),
     FOREIGN KEY (DepartmentID) REFERENCES Department (DepartmentID),
     FOREIGN KEY (PositionID) REFERENCES `Position` (PositionID)
 );
@@ -36,9 +36,9 @@ CREATE TABLE `Account` (
 DROP TABLE IF EXISTS `Group`;
 CREATE TABLE `Group` (
 	GroupID 		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	GroupName 		VARCHAR(50) UNIQUE,
-	CreatorID 		INT UNSIGNED,
-	CreateDate		DATE,
+	GroupName 		NVARCHAR(50) UNIQUE NOT NULL,
+	CreatorID 		INT UNSIGNED NOT NULL,
+	CreateDate		DATETIME DEFAULT now(),
     FOREIGN KEY (CreatorID) REFERENCES `Account` (AccountID)
 );
 
@@ -47,8 +47,9 @@ DROP TABLE IF EXISTS GroupAccount;
 CREATE TABLE GroupAccount (
 	GroupID			INT UNSIGNED,
 	AccountID		INT UNSIGNED,
- 	JoinDate		DATE,
-	FOREIGN KEY (GroupID) REFERENCES `Group` (GroupID),
+ 	JoinDate		DATETIME DEFAULT NOW(),
+	PRIMARY KEY (GroupID, AccountID),
+    FOREIGN KEY (GroupID) REFERENCES `Group` (GroupID),
 	FOREIGN KEY (AccountID) REFERENCES `Account` (AccountID)
 );
 
@@ -56,14 +57,14 @@ CREATE TABLE GroupAccount (
 DROP TABLE IF EXISTS TypeQuestion;
 CREATE TABLE TypeQuestion (
 	TypeID			INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    TypeName		VARCHAR (50)
+    TypeName		NVARCHAR (50) NOT NULL
 );
 
 -- CREATE TABLE CategoryQuestion
 DROP TABLE IF EXISTS CategoryQuestion;
 CREATE TABLE CategoryQuestion (
 	CategoryID 		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    CategoryName 	VARCHAR (50)
+    CategoryName 	NVARCHAR (50) NOT NULL
 );
 
 -- CREATE TABLE Question
@@ -71,10 +72,10 @@ DROP TABLE IF EXISTS Question;
 CREATE TABLE Question (
 	QuestionID		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	Content			TEXT,
-	CategoryID		INT UNSIGNED,
-	TypeID			INT UNSIGNED,
-	CreatorID		INT UNSIGNED,
-	CreateDate		DATE,
+	CategoryID		INT UNSIGNED NOT NULL,
+	TypeID			INT UNSIGNED NOT NULL,
+	CreatorID		INT UNSIGNED NOT NULL,
+	CreateDATETIME	DATETIME DEFAULT NOW(),
     FOREIGN KEY (CategoryID) REFERENCES CategoryQuestion (CategoryID),
     FOREIGN KEY (TypeID) REFERENCES TypeQuestion (TypeID),
     FOREIGN KEY (CreatorID) REFERENCES `Account` (AccountID)
@@ -85,8 +86,8 @@ DROP TABLE IF EXISTS Answer;
 CREATE TABLE Answer(
 	AnswerID		INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	Content			TEXT,
-    QuestionID		INT UNSIGNED,
-	isCorrect		BOOLEAN,
+    QuestionID		INT UNSIGNED NOT NULL,
+	isCorrect		BIT NOT NULL,
     FOREIGN KEY (QuestionID) REFERENCES Question (QuestionID)
 );
 
@@ -94,12 +95,12 @@ CREATE TABLE Answer(
 DROP TABLE IF EXISTS Exam;
 CREATE TABLE Exam (
 	ExamID			INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `Code`			VARCHAR (50),
-    Title			VARCHAR (50),
-    CategoryID		INT UNSIGNED,
-    Duration 		INT,
-    CreatorID		INT UNSIGNED,
-    CreateDate		DATE,
+    `Code`			NVARCHAR (50) NOT NULL,
+    Title			NVARCHAR (50) NOT NULL,
+    CategoryID		INT UNSIGNED NOT NULL,
+    Duration 		INT NOT NULL,
+    CreatorID		INT UNSIGNED NOT NULL,
+    CreateDate		DATETIME DEFAULT now(),
     FOREIGN KEY (CategoryID) REFERENCES CategoryQuestion (CategoryID),
     FOREIGN KEY (CreatorID) REFERENCES `Account` (AccountID)
 );
@@ -107,8 +108,9 @@ CREATE TABLE Exam (
 -- CREATE TABLE ExamQuestion
 DROP TABLE IF EXISTS ExamQuestion;
 CREATE TABLE ExamQuestion (
-	ExamID			INT UNSIGNED,
-	QuestionID		INT UNSIGNED,
+	ExamID			INT UNSIGNED NOT NULL,
+	QuestionID		INT UNSIGNED NOT NULL,
+    PRIMARY KEY (ExamID, QuestionID),
     FOREIGN KEY (ExamID) REFERENCES Exam (ExamID),
     FOREIGN KEY (QuestionID) REFERENCES Question (QuestionID)
 );
@@ -124,39 +126,33 @@ VALUES					('Production'),
                         ('Waiting Room');
                         
 -- Bang Position
-INSERT INTO Position (PositionName)
-VALUES				  ('Developer'),
-					  ('Tester'),
-                      ('Comtor'),
-                      ('Business Analysis'),
-                      ('Quality Assurance'),
-                      ('Project Manager'),
-                      ('Solution Architect'),
-                      ('Scrum Master');
-                
+INSERT INTO `Position` (PositionName)
+VALUES				 ('Dev'), ('Test'), ('Scrum Master'), ('PM'), ('Sale'), ('MKT'), ('BV'), ('Warehouse');
+                        
 -- Bang Account
 INSERT INTO `Account`
 (Email, 							UserName, 			FullName, 					DepartmentID, 		PositionID) VALUES
 ('tfermer0@ucla.edu', 				'tfermer0', 		'Tully Fermer', 			1, 					1		   ),
-('tgatchell1@bbb.org', 				'tgatchell1', 		'Tuck Gatchell', 			2, 					1		   ),
+('tgatchell1@bbb.org', 				'tgatchell1', 		'Tuck Gatchell', 			2, 					8		   ),
 ('bsoutherell2@tripadvisor.com', 	'bsoutherell2', 	'Beatrisa Fermer', 			3, 					2		   ),
 ('dtomley3@nymag.com', 				'dtomley3', 		'Denis Tomley', 			2, 					1		   ),
 ('asteaning4@paginegialle.it', 		'asteaning4', 		'Allis Steaning', 			5, 					5		   ),
-('rwynrehame5@census.gov', 			'rwynrehame5', 		'Rodina Wynrehame', 		6, 					6		   ),
-('atanti6@eventbrite.com', 			'atanti6', 			'Amabelle Tanti', 			5, 					7		   ),
-('olewington7@seesaa.net', 			'olewington7', 		'Ophelia Lewington', 		1, 					5		   ),
-('glinklater8@w3.org', 				'glinklater8', 		'Germain Linklater', 		5, 					1		   ),
+('rwynrehame5@census.gov', 			'rwynrehame5', 		'Rodina Wynrehame', 		6, 					4		   ),
+('atanti6@eventbrite.com', 			'atanti6', 			'Amabelle Tanti', 			5, 					3		   ),
+('olewington7@seesaa.net', 			'olewington7', 		'Ophelia Lewington', 		1, 					6		   ),
+('glinklater8@w3.org', 				'glinklater8', 		'Germain Linklater', 		5, 					7		   ),
 ('mmcorkil9@reference.com', 		'mmcorkil9', 		'Michaeline McOrkil', 		2, 					2		   ),
-('cjonuzia@irs.gov', 				'cjonuzia', 		'Cheri Jonuzi', 			3, 					3		   ),
+('cjonuzia@irs.gov', 				'cjonuzia', 		'Cheri Jonuzi', 			3, 					6		   ),
 ('tlamontb@ow.ly', 					'tlamontb', 		'Tessi Lamont', 			3, 					3		   ),
 ('dkelsallc@ftc.gov', 				'dkelsallc', 		'Dosi Kelsall', 			4, 					4		   ),
-('cbleackleyd@myspace.com', 		'cbleackleyd', 		'Carley Bleackley', 		5, 					8		   ),
-('agerrarde@altervista.org', 		'agerrarde', 		'Annnora Gerrard', 			3, 					4		   ),
+('cbleackleyd@myspace.com', 		'cbleackleyd', 		'Carley Bleackley', 		5, 					7		   ),
+('agerrarde@altervista.org', 		'agerrarde', 		'Annnora Gerrard', 			3, 					8		   ),
 ('mkevisf@photobucket.com', 		'mkevisf', 			'Mae Kevis', 				4, 					3		   ),
-('ewahlbergg@independent.co.uk', 	'ewahlbergg', 		'Etienne Wahlberg', 		6, 					7		   ),
-('fcoyh@baidu.com', 				'fcoyh', 			'Fionna Coy', 				5, 					7		   ),
-('lcuruclisi@eepurl.com', 			'lcuruclisi', 		'Lorettalorna Curuclis', 	2, 					8		   ),
+('ewahlbergg@independent.co.uk', 	'ewahlbergg', 		'Etienne Wahlberg', 		6, 					1		   ),
+('fcoyh@baidu.com', 				'fcoyh', 			'Fionna Coy', 				5, 					2		   ),
+('lcuruclisi@eepurl.com', 			'lcuruclisi', 		'Lorettalorna Curuclis', 	2, 					5		   ),
 ('eribeiroj@unblog.fr', 			'eribeiroj', 		'Elsey Ribeiro', 			5, 					2		   );		
+
 
 -- Bang Group
 INSERT INTO `Group` (GroupName, 				CreatorID)
@@ -242,7 +238,7 @@ INSERT INTO Question
 3, 8, 17),
 ('Please explain the operators.',
 5, 1, 19),
-('Program documentation is the written description of the algorithm(s), coding method, design, testing, and proper use of a particular computer program. It is valuable for those who use the program on a day-to-day basis and also for the programmer(s) who are meant to correct, modify, and update the computer program. Program documentation is the written description of the algorithm(s), coding method, design, testing, and proper use of a particular computer program. It is valuable for those who use the program on a day-to-day basis and also for the programmer(s) who are meant to correct, modify, and update the computer program.',
+('Program documentation is the written description of the algorithm(s), coding method, design, testing, and proper use of a particular computer program. It is valuable for those who use the program on a day-to-day basis and also for the programmer(s) who are meant to correct, modify, and upDATETIME the computer program. Program documentation is the written description of the algorithm(s), coding method, design, testing, and proper use of a particular computer program. It is valuable for those who use the program on a day-to-day basis and also for the programmer(s) who are meant to correct, modify, and upDATETIME the computer program.',
 2, 2, 1);
 
 -- Bang Answer
@@ -262,7 +258,7 @@ INSERT INTO Answer
 4, 1),
 ('A loop is a structure in programming that can repeat a defined set of statements for a set number of times or until a particular condition is satisfied. There are three important types of loops.',
 4, 1),
-('Program documentation is the written description of the algorithm(s), coding method, design, testing, and proper use of a particular computer program. It is valuable for those who use the program on a day-to-day basis and also for the programmer(s) who are meant to correct, modify, and update the computer program.',
+('Program documentation is the written description of the algorithm(s), coding method, design, testing, and proper use of a particular computer program. It is valuable for those who use the program on a day-to-day basis and also for the programmer(s) who are meant to correct, modify, and upDATETIME the computer program.',
 5, 0),
 ('A constant is a programming entity whose value can’t be changed or modified during program execution. Constants are of two main types.',
 5, 1),
@@ -294,3 +290,16 @@ VALUES					  (1, 		1		   ),
                           (8, 		2		   ),
                           (3, 		10		   ),
                           (10, 		9		   );
+                          
+-- Update Table DepartmentName
+UPDATE 	department
+SET		DepartmentName = 'Sale'
+WHERE	DepartmentID = 3;
+
+-- DELETE TABLE AccountName
+DELETE
+FROM	`Account`
+WHERE	UserName = 'rwynrehame5';
+
+
+

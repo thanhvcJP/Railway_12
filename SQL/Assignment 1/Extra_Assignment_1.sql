@@ -11,9 +11,9 @@ CREATE TABLE Trainee (
 	Full_Name			VARCHAR (50) NOT NULL,
 	Birth_Date			DATE,
 	Gender				ENUM ('Male','Female','Unknown') NOT NULL,
-	ET_IQ				TINYINT (20) UNSIGNED NOT NULL,
-	ET_Gmath			TINYINT (20) UNSIGNED NOT NULL,
-	ET_English			TINYINT (50) UNSIGNED NOT NULL,
+	ET_IQ				TINYINT UNSIGNED CHECK (ET_IQ >0 AND ET_IQ <=20),
+	ET_Gmath			TINYINT UNSIGNED CHECK (ET_Gmath >0 AND ET_Gmath <=20),
+	ET_English			TINYINT UNSIGNED CHECK (ET_English >0 AND ET_English <=50),
 	Training_Class		VARCHAR (50) NOT NULL,
 	Evaluation_Notes	TEXT,
     VTI_Account			VARCHAR (50) NOT NULL UNIQUE
